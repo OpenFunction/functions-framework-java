@@ -62,7 +62,8 @@ public class SynchronizeRuntime extends HttpServlet implements Runtime {
     @Override
     public void start() throws Exception {
         // create dapr client when dapr sidecar enabled.
-        if (System.getenv("DAPR_GRPC_PORT") != null || System.getenv("DAPR_HTTP_PORT") != null) {
+        if ((runtimeContext.getInputs() != null && !runtimeContext.getInputs().isEmpty()) ||
+                (runtimeContext.getOutputs() != null && !runtimeContext.getOutputs().isEmpty())) {
             daprClient = new DaprClientBuilder().build();
             daprClient.waitForSidecar(Runtime.WaitDaprSidecarTimeout);
         }

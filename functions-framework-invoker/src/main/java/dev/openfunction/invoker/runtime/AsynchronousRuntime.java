@@ -88,7 +88,6 @@ public final class AsynchronousRuntime implements Runtime {
         private DaprClient daprClient;
 
         public void start(int port) throws Exception {
-
             daprServer = ServerBuilder
                     .forPort(port)
                     .addService(Service.this)

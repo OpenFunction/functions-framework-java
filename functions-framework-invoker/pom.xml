@@ -10,7 +10,7 @@
 
     <groupId>dev.openfunction.functions</groupId>
     <artifactId>functions-framework-invoker</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 
     <properties>
         <maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
