@@ -101,8 +101,7 @@ public class UserContext implements Context {
             // binding must be in CloudEvent format, otherwise pubsub cannot parse the data.
             byte[] payload = data.getBytes();
             if (MiddlewaresCloudEventFormatRequired.contains(output.getComponentType())) {
-                CloudEvent event = packageAsCloudevent(data);
-                payload = new JsonEventFormat().serialize(event);
+                payload = packageAsCloudevent(data);
             }
 
             daprClient.invokeBinding(output.getComponentName(), output.getOperation(), payload).block();
@@ -169,14 +168,15 @@ public class UserContext implements Context {
     }
 
     @Override
-    public CloudEvent packageAsCloudevent(String payload) {
-        return new CloudEventBuilder()
+    public byte[] packageAsCloudevent(String payload) {
+        CloudEvent event = new CloudEventBuilder()
                 .withId(UUID.randomUUID().toString())
                 .withType("dapr.invoke")
                 .withSource(URI.create("openfunction/invokeBinding"))
                 .withData(payload.getBytes())
                 .withDataContentType(JsonEventFormat.CONTENT_TYPE)
                 .build();
+        return new JsonEventFormat().serialize(event);
     }
 
     @Override

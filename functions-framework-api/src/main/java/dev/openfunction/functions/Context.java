@@ -121,5 +121,5 @@ public interface Context {
      */
     DaprClient getDaprClient();
 
-    CloudEvent packageAsCloudevent(String payload);
+    byte[] packageAsCloudevent(String payload);
 }

@@ -66,24 +66,39 @@ public class RuntimeContext {
 
         loadHooks(classLoader);
 
-        if (functionContext.isTracingEnabled() && functionContext.getPluginsTracing().getProvider() != null) {
-            String provider = functionContext.getPluginsTracing().getProvider().getName();
+        TracingConfig  tracingConfig = getTracingConfig();
+        if (tracingConfig != null && tracingConfig.isEnabled() && tracingConfig.getProvider() != null) {
+            String provider = tracingConfig.getProvider().getName();
             if (!Objects.equals(provider, TracingSkywalking) && !Objects.equals(provider, TracingOpentelemetry)) {
                 throw new IllegalArgumentException("unsupported tracing provider " + provider);
             }
 
             switch (provider) {
                 case TracingSkywalking:
-                    tracingProvider = new SkywalkingProvider();
-                case TracingOpentelemetry:
-                    tracingProvider = new OpenTelemetryProvider(functionContext.getPluginsTracing(),
+                    tracingProvider = new SkywalkingProvider(tracingConfig,
                             functionContext.getName(),
                             System.getenv(RuntimeContext.PodNameEnvName),
                             System.getenv(RuntimeContext.PodNamespaceEnvName));
+                    break;
+                case TracingOpentelemetry:
+                    tracingProvider = new OpenTelemetryProvider(tracingConfig,
+                            functionContext.getName(),
+                            System.getenv(RuntimeContext.PodNameEnvName),
+                            System.getenv(RuntimeContext.PodNamespaceEnvName));
+                    break;
             }
         }
 
         EventFormatProvider.getInstance().registerFormat(new JsonEventFormat());
+    }
+
+    private TracingConfig getTracingConfig() {
+        TracingConfig tracingConfig = functionContext.getTracing();
+        if (tracingConfig != null) {
+            return tracingConfig;
+        }
+
+        return functionContext.getPluginsTracing();
     }
 
     private void loadHooks(ClassLoader classLoader) {

@@ -128,16 +128,6 @@ class FunctionContext {
         this.pluginsTracing = pluginsTracing;
     }
 
-    public boolean isTracingEnabled() {
-        if (tracing != null ) {
-            return tracing.isEnabled();
-        } else if (pluginsTracing != null) {
-            return pluginsTracing.isEnabled();
-        } else {
-            return false;
-        }
-    }
-
     public Map<String, Component> getStates() {
         return states;
     }
