@@ -19,6 +19,7 @@ package dev.openfunction.invoker;
 
 import dev.openfunction.invoker.context.RuntimeContext;
 import dev.openfunction.invoker.trigger.DaprTrigger;
+import dev.openfunction.invoker.trigger.EventMeshTrigger;
 import dev.openfunction.invoker.trigger.HttpTrigger;
 import dev.openfunction.invoker.trigger.Trigger;
 import org.apache.commons.lang3.StringUtils;
@@ -80,6 +81,10 @@ public class Runner {
 
             if (runtimeContext.hasDaprTrigger()) {
                 triggers.add(new DaprTrigger(runtimeContext, functionClasses));
+            }
+
+            if (runtimeContext.hasEventMeshTrigger()) {
+                triggers.add(new EventMeshTrigger(runtimeContext, functionClasses));
             }
 
             for (Trigger trigger : triggers) {

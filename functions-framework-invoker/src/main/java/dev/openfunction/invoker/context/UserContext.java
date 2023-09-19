@@ -24,6 +24,8 @@ import io.cloudevents.core.v03.CloudEventBuilder;
 import io.dapr.client.DaprClient;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.apache.eventmesh.client.grpc.producer.EventMeshGrpcProducer;
+
 import java.net.URI;
 import java.util.*;
 import java.util.logging.Level;
@@ -44,7 +46,9 @@ public class UserContext implements Context {
     );
 
     private final RuntimeContext runtimeContext;
-    private final DaprClient daprClient;
+    private DaprClient daprClient;
+
+    private EventMeshGrpcProducer eventMeshGrpcProducer;
 
     private Out out;
 
@@ -60,6 +64,11 @@ public class UserContext implements Context {
     public UserContext(RuntimeContext runtimeContext, DaprClient daprClient) {
         this.runtimeContext = runtimeContext;
         this.daprClient = daprClient;
+    }
+
+    public UserContext(RuntimeContext runtimeContext, EventMeshGrpcProducer eventMeshGrpcProducer) {
+        this.runtimeContext = runtimeContext;
+        this.eventMeshGrpcProducer = eventMeshGrpcProducer;
     }
 
     public UserContext withHttp(HttpRequest httpRequest, HttpResponse httpResponse) {
@@ -101,8 +110,7 @@ public class UserContext implements Context {
             // binding must be in CloudEvent format, otherwise pubsub cannot parse the data.
             byte[] payload = data.getBytes();
             if (MiddlewaresCloudEventFormatRequired.contains(output.getComponentType())) {
-                CloudEvent event = packageAsCloudevent(data);
-                payload = new JsonEventFormat().serialize(event);
+                payload = packageAsCloudevent(data);
             }
 
             daprClient.invokeBinding(output.getComponentName(), output.getOperation(), payload).block();
@@ -169,14 +177,20 @@ public class UserContext implements Context {
     }
 
     @Override
-    public CloudEvent packageAsCloudevent(String payload) {
-        return new CloudEventBuilder()
+    public EventMeshGrpcProducer getEventMeshProducer() {
+        return eventMeshGrpcProducer;
+    }
+
+    @Override
+    public byte[] packageAsCloudevent(String payload) {
+        CloudEvent event = new CloudEventBuilder()
                 .withId(UUID.randomUUID().toString())
                 .withType("dapr.invoke")
                 .withSource(URI.create("openfunction/invokeBinding"))
                 .withData(payload.getBytes())
                 .withDataContentType(JsonEventFormat.CONTENT_TYPE)
                 .build();
+        return new JsonEventFormat().serialize(event);
     }
 
     @Override

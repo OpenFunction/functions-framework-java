@@ -128,16 +128,6 @@ class FunctionContext {
         this.pluginsTracing = pluginsTracing;
     }
 
-    public boolean isTracingEnabled() {
-        if (tracing != null ) {
-            return tracing.isEnabled();
-        } else if (pluginsTracing != null) {
-            return pluginsTracing.isEnabled();
-        } else {
-            return false;
-        }
-    }
-
     public Map<String, Component> getStates() {
         return states;
     }
@@ -182,6 +172,8 @@ class FunctionContext {
         private HttpTrigger http;
         private DaprTrigger[] dapr;
 
+        private EventMeshTrigger eventMesh;
+
         public HttpTrigger getHttp() {
             return http;
         }
@@ -196,6 +188,14 @@ class FunctionContext {
 
         public void setDapr(DaprTrigger[] dapr) {
             this.dapr = dapr;
+        }
+
+        public EventMeshTrigger getEventMesh() {
+            return eventMesh;
+        }
+
+        public void setEventMesh(EventMeshTrigger eventMesh) {
+            this.eventMesh = eventMesh;
         }
     }
 
@@ -250,4 +250,99 @@ class FunctionContext {
             this.inputName = inputName;
         }
     }
+
+    static class EventMeshTrigger {
+        private String name;
+
+        private String type;
+
+        private String topic;
+
+        private String eventMeshConnectorAddr;
+
+        private String eventMeshConnectorPort;
+
+        private String producerGroup;
+
+        private String env;
+
+        private String idc;
+
+        private String sysId;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public String getTopic() {
+            return topic;
+        }
+
+        public void setTopic(String topic) {
+            this.topic = topic;
+        }
+
+
+        public String getEventMeshConnectorAddr() {
+            return eventMeshConnectorAddr;
+        }
+
+        public void setEventMeshConnectorAddr(String eventMeshConnectorAddr) {
+            this.eventMeshConnectorAddr = eventMeshConnectorAddr;
+        }
+
+        public String getEventMeshConnectorPort() {
+            return eventMeshConnectorPort;
+        }
+
+        public void setEventMeshConnectorPort(String eventMeshConnectorPort) {
+            this.eventMeshConnectorPort = eventMeshConnectorPort;
+        }
+
+        public String getProducerGroup() {
+            return producerGroup;
+        }
+
+        public void setProducerGroup(String producerGroup) {
+            this.producerGroup = producerGroup;
+        }
+
+        public String getEnv() {
+            return env;
+        }
+
+        public void setEnv(String env) {
+            this.env = env;
+        }
+
+        public String getIdc() {
+            return idc;
+        }
+
+        public void setIdc(String idc) {
+            this.idc = idc;
+        }
+
+        public String getSysId() {
+            return sysId;
+        }
+
+        public void setSysId(String sysId) {
+            this.sysId = sysId;
+        }
+    }
+
+
 }

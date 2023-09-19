@@ -16,6 +16,8 @@ limitations under the License.
 
 package dev.openfunction.functions;
 
+import org.apache.eventmesh.client.grpc.producer.EventMeshGrpcProducer;
+
 import io.cloudevents.CloudEvent;
 import io.dapr.client.DaprClient;
 
@@ -121,5 +123,7 @@ public interface Context {
      */
     DaprClient getDaprClient();
 
-    CloudEvent packageAsCloudevent(String payload);
+    EventMeshGrpcProducer getEventMeshProducer();
+
+    byte[] packageAsCloudevent(String payload);
 }
