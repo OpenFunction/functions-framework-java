@@ -24,6 +24,8 @@ import io.cloudevents.core.v03.CloudEventBuilder;
 import io.dapr.client.DaprClient;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.apache.eventmesh.client.grpc.producer.EventMeshGrpcProducer;
+
 import java.net.URI;
 import java.util.*;
 import java.util.logging.Level;
@@ -44,7 +46,9 @@ public class UserContext implements Context {
     );
 
     private final RuntimeContext runtimeContext;
-    private final DaprClient daprClient;
+    private DaprClient daprClient;
+
+    private EventMeshGrpcProducer eventMeshGrpcProducer;
 
     private Out out;
 
@@ -60,6 +64,11 @@ public class UserContext implements Context {
     public UserContext(RuntimeContext runtimeContext, DaprClient daprClient) {
         this.runtimeContext = runtimeContext;
         this.daprClient = daprClient;
+    }
+
+    public UserContext(RuntimeContext runtimeContext, EventMeshGrpcProducer eventMeshGrpcProducer) {
+        this.runtimeContext = runtimeContext;
+        this.eventMeshGrpcProducer = eventMeshGrpcProducer;
     }
 
     public UserContext withHttp(HttpRequest httpRequest, HttpResponse httpResponse) {
@@ -165,6 +174,11 @@ public class UserContext implements Context {
     @Override
     public DaprClient getDaprClient() {
         return daprClient;
+    }
+
+    @Override
+    public EventMeshGrpcProducer getEventMeshProducer() {
+        return eventMeshGrpcProducer;
     }
 
     @Override

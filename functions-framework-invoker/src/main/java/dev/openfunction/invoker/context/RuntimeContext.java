@@ -26,7 +26,7 @@ import dev.openfunction.invoker.tracing.SkywalkingProvider;
 import dev.openfunction.invoker.tracing.TracingProvider;
 import io.cloudevents.CloudEvent;
 import io.cloudevents.core.provider.EventFormatProvider;
-import org.apache.commons.collections.CollectionUtils;
+
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -222,6 +222,36 @@ public class RuntimeContext {
             }
 
             return triggers;
+        }
+
+        return null;
+    }
+
+
+    public boolean hasEventMeshTrigger() {
+        return functionContext.getTriggers() != null && functionContext.getTriggers().getEventMesh() != null;
+    }
+
+    public Component getEventMeshTrigger() {
+        if (functionContext.getTriggers() != null &&
+            functionContext.getTriggers().getEventMesh() != null) {
+            FunctionContext.EventMeshTrigger trigger = functionContext.getTriggers().getEventMesh();
+
+            Component component = new Component();
+            component.setComponentName(trigger.getName());
+            component.setComponentType(trigger.getType());
+            component.setTopic(trigger.getTopic());
+            Map<String, String> metaDataMap = new HashMap<>();
+            metaDataMap.put("eventMeshConnectorAddr", trigger.getEventMeshConnectorAddr());
+            metaDataMap.put("eventMeshConnectorPort", trigger.getEventMeshConnectorPort());
+            metaDataMap.put("producerGroup", trigger.getProducerGroup());
+            metaDataMap.put("env", trigger.getEnv());
+            metaDataMap.put("idc", trigger.getIdc());
+            metaDataMap.put("sysId", trigger.getSysId());
+
+            component.setMetadata(metaDataMap);
+
+            return component;
         }
 
         return null;
