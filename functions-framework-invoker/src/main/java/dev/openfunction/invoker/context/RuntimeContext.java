@@ -26,7 +26,7 @@ import dev.openfunction.invoker.tracing.SkywalkingProvider;
 import dev.openfunction.invoker.tracing.TracingProvider;
 import io.cloudevents.CloudEvent;
 import io.cloudevents.core.provider.EventFormatProvider;
-import org.apache.commons.collections.CollectionUtils;
+
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -66,24 +66,39 @@ public class RuntimeContext {
 
         loadHooks(classLoader);
 
-        if (functionContext.isTracingEnabled() && functionContext.getPluginsTracing().getProvider() != null) {
-            String provider = functionContext.getPluginsTracing().getProvider().getName();
+        TracingConfig  tracingConfig = getTracingConfig();
+        if (tracingConfig != null && tracingConfig.isEnabled() && tracingConfig.getProvider() != null) {
+            String provider = tracingConfig.getProvider().getName();
             if (!Objects.equals(provider, TracingSkywalking) && !Objects.equals(provider, TracingOpentelemetry)) {
                 throw new IllegalArgumentException("unsupported tracing provider " + provider);
             }
 
             switch (provider) {
                 case TracingSkywalking:
-                    tracingProvider = new SkywalkingProvider();
-                case TracingOpentelemetry:
-                    tracingProvider = new OpenTelemetryProvider(functionContext.getPluginsTracing(),
+                    tracingProvider = new SkywalkingProvider(tracingConfig,
                             functionContext.getName(),
                             System.getenv(RuntimeContext.PodNameEnvName),
                             System.getenv(RuntimeContext.PodNamespaceEnvName));
+                    break;
+                case TracingOpentelemetry:
+                    tracingProvider = new OpenTelemetryProvider(tracingConfig,
+                            functionContext.getName(),
+                            System.getenv(RuntimeContext.PodNameEnvName),
+                            System.getenv(RuntimeContext.PodNamespaceEnvName));
+                    break;
             }
         }
 
         EventFormatProvider.getInstance().registerFormat(new JsonEventFormat());
+    }
+
+    private TracingConfig getTracingConfig() {
+        TracingConfig tracingConfig = functionContext.getTracing();
+        if (tracingConfig != null) {
+            return tracingConfig;
+        }
+
+        return functionContext.getPluginsTracing();
     }
 
     private void loadHooks(ClassLoader classLoader) {
@@ -207,6 +222,36 @@ public class RuntimeContext {
             }
 
             return triggers;
+        }
+
+        return null;
+    }
+
+
+    public boolean hasEventMeshTrigger() {
+        return functionContext.getTriggers() != null && functionContext.getTriggers().getEventMesh() != null;
+    }
+
+    public Component getEventMeshTrigger() {
+        if (functionContext.getTriggers() != null &&
+            functionContext.getTriggers().getEventMesh() != null) {
+            FunctionContext.EventMeshTrigger trigger = functionContext.getTriggers().getEventMesh();
+
+            Component component = new Component();
+            component.setComponentName(trigger.getName());
+            component.setComponentType(trigger.getType());
+            component.setTopic(trigger.getTopic());
+            Map<String, String> metaDataMap = new HashMap<>();
+            metaDataMap.put("eventMeshConnectorAddr", trigger.getEventMeshConnectorAddr());
+            metaDataMap.put("eventMeshConnectorPort", trigger.getEventMeshConnectorPort());
+            metaDataMap.put("producerGroup", trigger.getProducerGroup());
+            metaDataMap.put("env", trigger.getEnv());
+            metaDataMap.put("idc", trigger.getIdc());
+            metaDataMap.put("sysId", trigger.getSysId());
+
+            component.setMetadata(metaDataMap);
+
+            return component;
         }
 
         return null;

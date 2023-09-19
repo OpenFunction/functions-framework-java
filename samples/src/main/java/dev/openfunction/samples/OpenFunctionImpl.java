@@ -37,10 +37,12 @@ public class OpenFunctionImpl implements OpenFunction {
             for (String key : context.getOutputs().keySet()) {
                 Component output = context.getOutputs().get(key);
                 if (output.isPubsub()) {
-                    daprClient.publishEvent(output.getComponentName(), output.getTopic(), payload, output.getMetadata());
+                    daprClient.publishEvent(output.getComponentName(), output.getTopic(), payload, output.getMetadata()).block();
+                    System.out.println("send data to " + output.getComponentName());
                 } else if (output.isBinding()) {
                     // We recommend using CloudEvents to pass data between Dapr components.
-                    daprClient.invokeBinding(output.getComponentName(), output.getOperation(), context.packageAsCloudevent(payload));
+                    daprClient.invokeBinding(output.getComponentName(), output.getOperation(), context.packageAsCloudevent(payload), output.getMetadata()).block();
+                    System.out.println("send data to " + output.getComponentName());
                 }
             }
         }

@@ -48,7 +48,7 @@ public class OpenTelemetryProvider implements TracingProvider {
     private static final String Protocol_HTTP = "http";
 
     private final String functionName;
-    private final Map<String, String> tags;
+    private  Map<String, String> tags;
     private final Map<String, String> baggage;
     private final TextMapGetter<Map<String, String>> getter;
 
@@ -107,6 +107,9 @@ public class OpenTelemetryProvider implements TracingProvider {
         };
 
         tags = config.getTags();
+        if (tags == null) {
+            tags = new HashMap<>();
+        }
         if (!Objects.equals(pod, "")) {
             tags.put("instance", pod);
         }
@@ -238,7 +241,7 @@ public class OpenTelemetryProvider implements TracingProvider {
         executeWithTracing(ctx.getFunctionClass().getSimpleName(), kind, tags, callback);
     }
 
-    public void executeWithTracing(Map<String, String> carrier, Callback callback) throws Exception {
+    private void executeWithTracing(Map<String, String> carrier, Callback callback) throws Exception {
         TextMapPropagator propagator = GlobalOpenTelemetry.getPropagators().getTextMapPropagator();
         Context parentContext = propagator.extract(Context.root(), carrier, getter);
         Tracer tracer = GlobalOpenTelemetry.getTracer(OTEL_LIBRARY_NAME, OTEL_LIBRARY_VERSION);
