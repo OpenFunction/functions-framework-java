@@ -36,7 +36,7 @@
         <dependency>
             <groupId>io.dapr</groupId>
             <artifactId>dapr-sdk</artifactId>
-            <version>1.8.0</version>
+            <version>1.17.2</version>
         </dependency>
         <dependency>
             <groupId>org.apache.eventmesh</groupId>
